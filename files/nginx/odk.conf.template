@@ -25,7 +25,7 @@ server {
 
   include /usr/share/odk/nginx/common-headers.conf;
 
-  client_max_body_size 100m;
+  client_max_body_size 2048m;
 
   gzip on;
   gzip_vary on;

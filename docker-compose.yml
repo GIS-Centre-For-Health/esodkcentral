@@ -49,9 +49,11 @@ services:
     environment:
       - DOMAIN=${DOMAIN}
       - SYSADMIN_EMAIL=${SYSADMIN_EMAIL}
-      - HTTPS_PORT=${HTTPS_PORT:-443}
+      - HTTPS_PORT=${UPSTREAM_HTTPS_PORT:-443}
       - NODE_OPTIONS=${SERVICE_NODE_OPTIONS:-}
       - DB_HOST=${DB_HOST:-postgres14}
+      # Aded DB_PORT to config.json.template and start-odk.sh
+      - DB_PORT=${DB_PORT:-5432}
       - DB_USER=${DB_USER:-odk}
       - DB_PASSWORD=${DB_PASSWORD:-odk}
       - DB_NAME=${DB_NAME:-odk}
@@ -74,7 +76,8 @@ services:
       - S3_ACCESS_KEY=${S3_ACCESS_KEY:-}
       - S3_SECRET_KEY=${S3_SECRET_KEY:-}
       - S3_BUCKET_NAME=${S3_BUCKET_NAME:-}
-    command: [ "wait-for-it", "${DB_HOST:-postgres14}:5432", "--", "./start-odk.sh" ]
+    # Override default port 5432
+    command: [ "wait-for-it", "${DB_HOST:-postgres14}:${DB_PORT:-5432}", "--", "./start-odk.sh"]
     restart: always
     logging:
       driver: local
@@ -93,6 +96,7 @@ services:
       - SENTRY_KEY=${SENTRY_KEY:-3cf75f54983e473da6bd07daddf0d2ee}
       - SENTRY_PROJECT=${SENTRY_PROJECT:-1298632}
       - OIDC_ENABLED=${OIDC_ENABLED:-false}
+      - CLIENT_MAX_BODY_SIZE=100M
     volumes:
       - ./files/local/customssl/:/etc/customssl/live/local/:ro
       - ./files/nginx/odk.conf.template:/usr/share/odk/nginx/odk.conf.template:ro
@@ -131,7 +135,7 @@ services:
     environment:
       - DOMAIN=${DOMAIN}
       - SUPPORT_EMAIL=${SYSADMIN_EMAIL}
-      - HTTPS_PORT=${HTTPS_PORT:-443}
+      - HTTPS_PORT=${UPSTREAM_HTTPS_PORT:-443}
   enketo_redis_main:
     image: redis:7.2
     volumes:
